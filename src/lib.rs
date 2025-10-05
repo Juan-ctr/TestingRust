@@ -1,4 +1,4 @@
 pub mod graph;
 pub mod store;
 
-pub use graph::{Graph, Node};
+pub use graph::{Edge, Graph, GraphError, Node};

@@ -11,16 +11,27 @@ pub struct Node {
     pub name: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Edge {
+    pub from: u64,
+    pub to: u64,
+    pub kind: String,
+}
+
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Graph {
     #[serde(default)]
     nodes: HashMap<u64, Node>,
+    #[serde(default)]
+    edges: Vec<Edge>,
 }
 
 #[derive(Debug, Error)]
 pub enum GraphError {
     #[error("el id {0} ya existe")]
     DuplicateId(u64),
+    #[error("no existe el nodo con id {0}")]
+    MissingNode(u64),
 }
 
 impl Graph {
@@ -28,6 +39,7 @@ impl Graph {
     pub fn new() -> Self {
         Self {
             nodes: HashMap::new(),
+            edges: Vec::new(),
         }
     }
     /// Inserta un nodo si el `id` no existe.
@@ -47,24 +59,33 @@ impl Graph {
         self.nodes.iter()
     }
 
+    /// Agrega una relación dirigida  `from -> to` del tipo `kind`.
+    /// Falla si `from` o `to` no existen.
+    ///
+    /// # Errors
+    /// Retorna `GraphError::MissingNode(id)` si alguno de los nodos no existe.
+    pub fn add_edge(&mut self, from: u64, to: u64, kind: String) -> Result<(), GraphError> {
+        if !self.nodes.contains_key(&from) {
+            return Err(GraphError::MissingNode(from));
+        }
+        if !self.nodes.contains_key(&to) {
+            return Err(GraphError::MissingNode(to));
+        }
+        self.edges.push(Edge { from, to, kind });
+        Ok(())
+    }
+
+    pub fn list_edges(&self) -> impl Iterator<Item = &Edge> {
+        self.edges.iter()
+    }
+
     #[cfg(test)]
     pub(crate) fn len(&self) -> usize {
         self.nodes.len()
     }
+
+    #[cfg(test)]
+    pub(crate) fn edges_len(&self) -> usize {
+        self.edges.len()
+    }
 }
-
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-//     #[test]
-//     fn agregar_y_listar_uno() {
-//         let mut g = Graph::new();
-//         let inserted = g.add_node(1, "Alice");
-//         assert!(inserted, "debería insertar un id nuevo");
-
-//         let listed = g.list_nodes();
-//         assert_eq!(listed.len(), 1);
-//         assert_eq!(listed[0].id, 1);
-//         assert_eq!(listed[0].name, "Alice");
-//     }
-// }

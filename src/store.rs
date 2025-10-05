@@ -35,8 +35,8 @@ impl GraphStore {
             return Ok(Graph::new());
         }
 
-        let file =
-            File::open(&self.path).with_context(|| format!("no se pudo abrir{:?}", self.path.display()))?;
+        let file = File::open(&self.path)
+            .with_context(|| format!("no se pudo abrir{:?}", self.path.display()))?;
 
         let reader = BufReader::new(file);
         let mut de = Deserializer::from_reader(reader);
@@ -61,8 +61,12 @@ impl GraphStore {
             .parent()
             .map_or_else(|| Path::new(".").to_path_buf(), Path::to_path_buf);
 
-        let tmp = NamedTempFile::new_in(&parent)
-            .with_context(|| format!("no se pudo crear archivo temporal en {:?}", parent.display()))?;
+        let tmp = NamedTempFile::new_in(&parent).with_context(|| {
+            format!(
+                "no se pudo crear archivo temporal en {:?}",
+                parent.display()
+            )
+        })?;
         {
             let writer = BufWriter::new(&tmp);
             let formatter = PrettyFormatter::with_indent(b" ");

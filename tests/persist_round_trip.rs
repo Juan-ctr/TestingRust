@@ -21,8 +21,8 @@ fn persist_round_trip() -> anyhow::Result<()> {
     let mut items = g2.list_nodes().collect::<Vec<_>>();
     items.sort_by_key(|(id, _)| **id);
 
-    assert_eq!(items.len(),1);
-    assert_eq!(*items[0].0,1);
+    assert_eq!(items.len(), 1);
+    assert_eq!(*items[0].0, 1);
     assert_eq!(items[0].1.name, "Alice");
 
     Ok(())
